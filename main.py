@@ -4,6 +4,7 @@ from tkinter import filedialog
 
 from threading import *
 from _thread import *
+from math import *
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -258,8 +259,17 @@ class Window(Frame):
             if (time!= 0 & (int(i)+1) % (int(time)+1) == 0):
                 self.setPicture2Output(picture2)
         self.setPicture2Output(picture2)
+        print(self.blad(obraz.wejsciowy, picture2))
         #print(picture2)
         return picture2
+
+    def blad(self, pic1, pic2):
+        suma = 0
+        for row in range(len(pic1)):
+            for col in range(len(pic1[0])):
+                suma += (pic1[row][col] - pic2[row][col]) * (pic1[row][col] - pic2[row][col])
+
+        return sqrt(suma / (len(pic1)*len(pic1[0])))
 
 root = Tk()
 root.geometry("620x400")
