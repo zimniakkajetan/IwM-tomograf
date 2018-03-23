@@ -228,7 +228,6 @@ class Window(Frame):
         self.setSinogramOutput(sinogram)
         #obraz.sinogram = np.array(sinogram)
         start_new_thread(self.makePicture, (sinogram,lines,pic))
-
         return sinogram, lines
 
     def setSinogramOutput(self,sin):
@@ -238,29 +237,33 @@ class Window(Frame):
 
     def setPicture2Output(self,pic):
         #self.outputCanvas.delete("all")
-        self.outputCanvas.image = ImageTk.PhotoImage(PIL.Image.fromarray((pic)))
+        self.outputCanvas.image = ImageTk.PhotoImage(PIL.Image.fromarray(np.array(pic)).resize((200,200),Image.ANTIALIAS))
         self.outputCanvas.create_image(0, 0, image=self.outputCanvas.image, anchor=NW)
 
     def makePicture(self, sinog, lines, pic):
         print("start make picture")
         picture2 = np.zeros([np.shape(pic)[0], np.shape(pic)[1]])
+        picture2sums = np.zeros([np.shape(pic)[0],np.shape(pic)[1]])
         a = np.shape(sinog)[0]
         b = np.shape(sinog)[1]
         time = 0
         if (self.speedSlider.get() != 0):  # LICZENIE LICZBY ITERACJI
             time = 180 / (a * (int(self.speedSlider.get()))/100)
+
+        count = np.zeros([np.shape(pic)[0], np.shape(pic)[1]])
         for i in range(0, a, 1):
             for j in range(0, b, 1):
                 x0, y0, x1, y1 = lines[i][j]
                 line = self.bresenhamLine(x0, y0, x1, y1)
                 for [x, y] in line:
                     if x >= 0 and y >= 0 and x < np.shape(pic)[0] and y < np.shape(pic)[1]:
-                        picture2[x][y] += sinog[i][j]
+                        picture2sums[x][y]+=sinog[i][j]
+                        count[x][y]+=1
+                        picture2[x][y]=picture2sums[x][y]/count[x][y]
             if (time!= 0 & (int(i)+1) % (int(time)+1) == 0):
                 self.setPicture2Output(picture2)
         self.setPicture2Output(picture2)
         print(self.blad(obraz.wejsciowy, picture2))
-        #print(picture2)
         return picture2
 
     def blad(self, pic1, pic2):
