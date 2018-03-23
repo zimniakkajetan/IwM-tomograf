@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from skimage.color import rgb2gray
 from skimage import data, io
+import time
 
 from PIL import ImageTk, Image
 import PIL
@@ -68,7 +69,7 @@ class Window(Frame):
         self.coneWidthEntry=Entry(self,width=4,justify=RIGHT)
         self.coneWidthEntry.grid(row=5,column=0,sticky='e',padx=xpadding)
 
-        Label(self,text="Liczba iteracji[%]:").grid(row=2,column=1,columnspan=2,pady=(top_padding,bottom_padding))
+        Label(self,text="Opóźnienie przetwarzania:").grid(row=2,column=1,columnspan=2,pady=(top_padding,bottom_padding))
 
         self.speedSlider = Scale(self,from_=0,to=100,orient=HORIZONTAL,length=250)
         self.speedSlider.grid(row=3,column=1,columnspan=2,rowspan=2)
@@ -80,7 +81,7 @@ class Window(Frame):
         self.master.update()
 
     def set_default_values(self):
-        self.speedSlider.set(50)
+        self.speedSlider.set(0)
         self.detectorsEntry.insert(END,50)
         self.angleEntry.insert(END,1)
         self.coneWidthEntry.insert(END,90)
@@ -177,9 +178,7 @@ class Window(Frame):
         alpha = float(self.angleEntry.get())
         #rozpietosc = 90
         rozpietosc = float(self.coneWidthEntry.get())
-        time = 0
-        if(self.speedSlider.get() != 0): #LICZENIE LICZBY ITERACJI
-            time = 180 / ((180/alpha) * (int(self.speedSlider.get())/100))
+
         rozpietoscRadiany = rozpietosc * np.pi / 180;
         pic_size = len(pic[0])
 
@@ -189,7 +188,7 @@ class Window(Frame):
         lines = []
 
         i = 0
-        while i < 180:
+        while i < 360:
             sinogram.append([])
             lines.append([])
             katRadiany = i * np.pi / 180
@@ -222,8 +221,8 @@ class Window(Frame):
                 lines[-1].append([x0, y0, x1, y1])
             i += alpha
 
-            if (time!= 0 & (int(i)+1) % (int(time)+1) == 0):
-                self.setSinogramOutput(sinogram)
+            time.sleep(self.speedSlider.get()/1000)
+            self.setSinogramOutput(sinogram)
 
         self.setSinogramOutput(sinogram)
         #obraz.sinogram = np.array(sinogram)
@@ -246,9 +245,6 @@ class Window(Frame):
         picture2sums = np.zeros([np.shape(pic)[0],np.shape(pic)[1]])
         a = np.shape(sinog)[0]
         b = np.shape(sinog)[1]
-        time = 0
-        if (self.speedSlider.get() != 0):  # LICZENIE LICZBY ITERACJI
-            time = 180 / (a * (int(self.speedSlider.get()))/100)
 
         count = np.zeros([np.shape(pic)[0], np.shape(pic)[1]])
         for i in range(0, a, 1):
@@ -260,8 +256,8 @@ class Window(Frame):
                         picture2sums[x][y]+=sinog[i][j]
                         count[x][y]+=1
                         picture2[x][y]=picture2sums[x][y]/count[x][y]
-            if (time!= 0 & (int(i)+1) % (int(time)+1) == 0):
-                self.setPicture2Output(picture2)
+            time.sleep(self.speedSlider.get()/1000)
+            self.setPicture2Output(picture2)
         self.setPicture2Output(picture2)
         print(self.blad(obraz.wejsciowy, picture2))
         return picture2
