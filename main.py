@@ -184,12 +184,12 @@ class Window(Frame):
 
         r = pic_size
 
-        sinogram = []
         lines = []
 
         i = 0
-        while i < 360:
-            sinogram.append([])
+        finishAngle=360
+        sinogram=[[0 for x in range(numberOfDetectors)] for y in range(int(finishAngle/alpha))]
+        while i < finishAngle:
             lines.append([])
             katRadiany = i * np.pi / 180
             x0 = r * np.cos(katRadiany)
@@ -215,9 +215,9 @@ class Window(Frame):
                         pixLicz += 1
 
                 if pixLicz > 0:
-                    sinogram[-1].append(pixel / pixLicz)
+                    sinogram[int(i/alpha)][detector]=(pixel / pixLicz)
                 else:
-                    sinogram[-1].append(0)
+                    sinogram[int(i/alpha)][detector]=0
                 lines[-1].append([x0, y0, x1, y1])
             i += alpha
 
@@ -231,12 +231,12 @@ class Window(Frame):
 
     def setSinogramOutput(self,sin):
         #self.sinogramCanvas.delete("all")
-        self.sinogramCanvas.image = ImageTk.PhotoImage(PIL.Image.fromarray(np.array(sin)))
+        self.sinogramCanvas.image = ImageTk.PhotoImage(PIL.Image.fromarray(np.array(sin)).resize((self.sinogramCanvas.winfo_width(),self.sinogramCanvas.winfo_height()),Image.ANTIALIAS))
         self.sinogramCanvas.create_image(0, 0, image=self.sinogramCanvas.image, anchor=NW)
 
     def setPicture2Output(self,pic):
         #self.outputCanvas.delete("all")
-        self.outputCanvas.image = ImageTk.PhotoImage(PIL.Image.fromarray(np.array(pic)).resize((200,200),Image.ANTIALIAS))
+        self.outputCanvas.image = ImageTk.PhotoImage(PIL.Image.fromarray(np.array(pic)).resize((self.outputCanvas.winfo_width(),self.outputCanvas.winfo_height()),Image.ANTIALIAS))
         self.outputCanvas.create_image(0, 0, image=self.outputCanvas.image, anchor=NW)
 
     def makePicture(self, sinog, lines, pic):
