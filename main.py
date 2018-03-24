@@ -8,7 +8,6 @@ from math import *
 import numpy as np
 import time
 
-
 from PIL import ImageTk, Image
 import PIL
 class obraz():
@@ -36,9 +35,9 @@ class Window(Frame):
         self.inputCanvas.create_text(100,100,text="Obraz wejściowy")
         self.inputCanvas.grid(row=0,column=0)
 
-        self.sinogramCanvas = Canvas(self, width=80,height=200,bg='white')
-        self.sinogramCanvas.create_rectangle(2,2,80,200)
-        self.sinogramCanvas.create_text(50,50,text="Sinogram")
+        self.sinogramCanvas = Canvas(self, width=200,height=200,bg='white')
+        self.sinogramCanvas.create_rectangle(2,2,200,200)
+        self.sinogramCanvas.create_text(100,100,text="Sinogram")
         self.sinogramCanvas.grid(row=0,column=1)
 
         self.outputCanvas = Canvas(self,width=200,height=200,bg='white')
@@ -66,13 +65,18 @@ class Window(Frame):
         self.coneWidthEntry=Entry(self,width=4,justify=RIGHT)
         self.coneWidthEntry.grid(row=5,column=0,sticky='e',padx=xpadding)
 
+        self.filterVar = IntVar()
+        filterCheckbutton = Checkbutton(self,text="Rozmycie",variable=self.filterVar)
+        filterCheckbutton.grid(row=6,column=0,sticky='w',padx=xpadding)
+
+
         Label(self,text="Opóźnienie przetwarzania:").grid(row=2,column=1,columnspan=2,pady=(top_padding,bottom_padding))
 
         self.speedSlider = Scale(self,from_=0,to=100,orient=HORIZONTAL,length=250)
         self.speedSlider.grid(row=3,column=1,columnspan=2,rowspan=2)
 
         self.startButton = Button(self,text="Start",command=self.makeSinogram1, width=8)
-        self.startButton.grid(row=6,column=2,sticky='e',padx=20,pady=10)
+        self.startButton.grid(row=7,column=2,sticky='e',padx=20,pady=10)
 
         self.set_default_values()
         self.master.update()
@@ -255,7 +259,8 @@ class Window(Frame):
                         picture2[x][y]=picture2sums[x][y]/count[x][y]
             time.sleep(self.speedSlider.get()/1000)
             self.setPicture2Output(picture2)
-        picture2=self.denoise(picture2)
+        if self.filterVar.get()==1:
+            picture2=self.denoise(picture2)
         self.setPicture2Output(picture2)
         print(self.blad(obraz.wejsciowy, picture2))
         return picture2
@@ -286,7 +291,7 @@ class Window(Frame):
         return sqrt(suma / (len(pic1)*len(pic1[0])))
 
 root = Tk()
-root.geometry("620x400")
+root.geometry("620x420")
 
 app=Window(root)
 
