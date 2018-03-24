@@ -69,11 +69,15 @@ class Window(Frame):
         filterCheckbutton = Checkbutton(self,text="Rozmycie",variable=self.filterVar)
         filterCheckbutton.grid(row=6,column=0,sticky='w',padx=xpadding)
 
+        self.stepsVar = IntVar(value=1)
+        stepsCheckbutton = Checkbutton(self,text="Pokazuj kroki pośrednie",variable=self.stepsVar,command=self.set_speed_visibility)
+        stepsCheckbutton.grid(row=2,column=1,columnspan=2,pady=(top_padding,bottom_padding))
 
-        Label(self,text="Opóźnienie przetwarzania:").grid(row=2,column=1,columnspan=2,pady=(top_padding,bottom_padding))
+        self.speedLabel = Label(self,text="Prędkość:")
+        self.speedLabel.grid(row=3,column=1,columnspan=2)
 
         self.speedSlider = Scale(self,from_=0,to=100,orient=HORIZONTAL,length=250)
-        self.speedSlider.grid(row=3,column=1,columnspan=2,rowspan=2)
+        self.speedSlider.grid(row=4,column=1,columnspan=2,rowspan=2)
 
         self.startButton = Button(self,text="Start",command=self.makeSinogram1, width=8)
         self.startButton.grid(row=7,column=2,sticky='e',padx=20,pady=10)
@@ -81,8 +85,16 @@ class Window(Frame):
         self.set_default_values()
         self.master.update()
 
+    def set_speed_visibility(self):
+        if self.stepsVar.get() == 0:
+            self.speedLabel.grid_forget()
+            self.speedSlider.grid_forget()
+        if self.stepsVar.get() == 1:
+            self.speedLabel.grid(row=3,column=1,columnspan=2)
+            self.speedSlider.grid(row=4,column=1,columnspan=2,rowspan=2)
+
     def set_default_values(self):
-        self.speedSlider.set(0)
+        self.speedSlider.set(100)
         self.detectorsEntry.insert(END,50)
         self.angleEntry.insert(END,1)
         self.coneWidthEntry.insert(END,90)
@@ -222,8 +234,9 @@ class Window(Frame):
                 lines[-1].append([x0, y0, x1, y1])
             i += alpha
 
-            time.sleep(self.speedSlider.get()/1000)
-            self.setSinogramOutput(sinogram)
+            time.sleep((100-self.speedSlider.get())/1000)
+            if self.stepsVar.get() == 1:
+                self.setSinogramOutput(sinogram)
 
         self.setSinogramOutput(sinogram)
         #obraz.sinogram = np.array(sinogram)
@@ -257,8 +270,9 @@ class Window(Frame):
                         picture2sums[x][y]+=sinog[i][j]
                         count[x][y]+=1
                         picture2[x][y]=picture2sums[x][y]/count[x][y]
-            time.sleep(self.speedSlider.get()/1000)
-            self.setPicture2Output(picture2)
+            time.sleep((100-self.speedSlider.get())/1000)
+            if self.stepsVar.get()==1:
+                self.setPicture2Output(picture2)
         if self.filterVar.get()==1:
             picture2=self.denoise(picture2)
         self.setPicture2Output(picture2)
@@ -291,7 +305,7 @@ class Window(Frame):
         return sqrt(suma / (len(pic1)*len(pic1[0])))
 
 root = Tk()
-root.geometry("620x420")
+root.geometry("620x430")
 
 app=Window(root)
 
