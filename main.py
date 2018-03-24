@@ -2,15 +2,12 @@
 from tkinter import *
 from tkinter import filedialog
 
-from threading import *
 from _thread import *
 from math import *
 
 import numpy as np
-from matplotlib import pyplot as plt
-from skimage.color import rgb2gray
-from skimage import data, io
 import time
+
 
 from PIL import ImageTk, Image
 import PIL
@@ -258,9 +255,27 @@ class Window(Frame):
                         picture2[x][y]=picture2sums[x][y]/count[x][y]
             time.sleep(self.speedSlider.get()/1000)
             self.setPicture2Output(picture2)
+        picture2=self.denoise(picture2)
         self.setPicture2Output(picture2)
         print(self.blad(obraz.wejsciowy, picture2))
         return picture2
+
+    def denoise(self,picture):
+        picture2 = np.zeros([np.shape(picture)[0], np.shape(picture)[1]])
+        for i in range(1, picture2.shape[0]):
+            for j in range(1, picture2.shape[1]):
+                picture2[i][j] = self.average(picture, i, j)
+        return picture2
+
+    def average(self,picture, x, y):
+        sum = 0
+        kernel=[[1,4,7,4,1],[4,16,26,16,4],[7,26,41,26,7],[4,16,26,16,4],[1,4,7,4,1]]
+        denominator=273
+        for i in range(-2, 2):
+            for j in range(-2, 2):
+                if x+i>0 and x+i<np.shape(picture)[0] and y+j>0 and y+j<np.shape(picture)[1]:
+                    sum += picture[x + i][y + j]*kernel[i+2][j+2]
+        return int(sum / denominator)
 
     def blad(self, pic1, pic2):
         suma = 0
