@@ -65,8 +65,8 @@ class Window(Frame):
         self.coneWidthEntry=Entry(self,width=4,justify=RIGHT)
         self.coneWidthEntry.grid(row=5,column=0,sticky='e',padx=xpadding)
 
-        self.filterVar = IntVar()
-        filterCheckbutton = Checkbutton(self,text="Rozmycie",variable=self.filterVar)
+        self.filterVar = IntVar(value=1)
+        filterCheckbutton = Checkbutton(self,text="Użyj filtrowania",variable=self.filterVar)
         filterCheckbutton.grid(row=6,column=0,sticky='w',padx=xpadding)
 
         self.stepsVar = IntVar(value=1)
@@ -259,26 +259,34 @@ class Window(Frame):
         picture2sums = np.zeros([np.shape(pic)[0],np.shape(pic)[1]])
         a = np.shape(sinog)[0]
         b = np.shape(sinog)[1]
-
         count = np.zeros([np.shape(pic)[0], np.shape(pic)[1]])
+
+        use_filter = self.filterVar.get()==1
+
         for i in range(0, a, 1):
+            if use_filter:
+                view = self.filter(sinog[i])
+            else:
+                view=sinog[i]
+
             for j in range(0, b, 1):
                 x0, y0, x1, y1 = lines[i][j]
                 line = self.bresenhamLine(x0, y0, x1, y1)
                 for [x, y] in line:
                     if x >= 0 and y >= 0 and x < np.shape(pic)[0] and y < np.shape(pic)[1]:
-                        picture2sums[x][y]+=sinog[i][j]
+                        picture2sums[x][y]+=view[j]
                         count[x][y]+=1
-                        picture2[x][y]=picture2sums[x][y]/count[x][y]
+                        picture2[x][y]=picture2sums[x][y]
+                        if not use_filter:
+                            picture2[x][y]=picture2sums[x][y]/count[x][y]
             time.sleep((100-self.speedSlider.get())/1000)
             if self.stepsVar.get()==1:
                 self.setPicture2Output(picture2)
-        if self.filterVar.get()==1:
-            picture2=self.denoise(picture2)
         self.setPicture2Output(picture2)
         print(self.blad(obraz.wejsciowy, picture2))
         return picture2
 
+    #OBECNIE denoise oraz average NIEUŻYWANE
     def denoise(self,picture):
         picture2 = np.zeros([np.shape(picture)[0], np.shape(picture)[1]])
         for i in range(1, picture2.shape[0]):
@@ -296,6 +304,25 @@ class Window(Frame):
                     sum += picture[x + i][y + j]*kernel[i+2][j+2]
         return int(sum / denominator)
 
+    def filter(self,view):
+        kernel=np.zeros(40)
+        for i in range(0,40):
+            index=abs(i-20)
+            if index%2==0:
+                kernel[i]=0
+            if index%2==1:
+                kernel[i]=(-4.0/(pi**2))/(index**2)
+            if index==0:
+                kernel[i]=1
+        newView = np.zeros(len(view))
+        for i in range(0,len(view)):
+            for j in range(0,len(kernel)):
+                center = int(len(kernel)/2)
+                k=j-center
+                if i+k>0 and i+k<len(view):
+                    newView[i]+=view[i+k]*kernel[j]
+            #newView[i]=max(0,newView[i])
+        return newView
     def blad(self, pic1, pic2):
         suma = 0
         for row in range(len(pic1)):
