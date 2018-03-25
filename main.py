@@ -233,7 +233,8 @@ class Window(Frame):
                     sinogram[int(i/alpha)][detector]=0
                 lines[-1].append([x0, y0, x1, y1])
             i += alpha
-
+            while self.stepsVar.get()==1 and self.speedSlider.get()==0:
+                pass
             time.sleep((100-self.speedSlider.get())/1000)
             if self.stepsVar.get() == 1:
                 self.setSinogramOutput(sinogram)
@@ -280,6 +281,8 @@ class Window(Frame):
                         picture2[x][y]=picture2sums[x][y]
                         if not use_filter:
                             picture2[x][y]=picture2sums[x][y]/count[x][y]
+            while self.stepsVar.get()==1 and self.speedSlider.get()==0:
+                pass
             time.sleep((100-self.speedSlider.get())/1000)
             if self.stepsVar.get()==1:
                 self.setPicture2Output(picture2)
