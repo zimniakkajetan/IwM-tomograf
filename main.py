@@ -82,8 +82,13 @@ class Window(Frame):
         self.startButton = Button(self,text="Start",command=self.makeSinogram1, width=8)
         self.startButton.grid(row=7,column=2,sticky='e',padx=20,pady=10)
 
+        self.error = StringVar()
+        Label(self, textvariable=self.error, fg="red", font=("Helvetica", 16)).grid(row=7)
+
         self.set_default_values()
         self.master.update()
+
+        self.create_filter_kernel()
 
     def set_speed_visibility(self):
         if self.stepsVar.get() == 0:
@@ -171,16 +176,9 @@ class Window(Frame):
         return line
 
     def makeSinogram1(self):
+        self.error.set("")
+        self.sinogramCanvas.create_rectangle(0, 0, self.sinogramCanvas.winfo_width(), self.sinogramCanvas.winfo_height(), fill="black")
         start_new_thread(self.makeSinogram, ())
-
-    '''  class myThread(Thread):
-        def __init__(self):
-            Thread.__init__(self)
-
-        def run(self):
-            print("Starting ")
-            Window.makeSinogram()
-            print ("Exiting ")'''
 
     def makeSinogram(self):
         pic = obraz.wejsciowy
@@ -255,6 +253,7 @@ class Window(Frame):
 
     def makePicture(self, sinog, lines, pic):
         print("start make picture")
+        self.outputCanvas.create_rectangle(0, 0, self.outputCanvas.winfo_width(), self.outputCanvas.winfo_height(), fill="black")
         picture2 = np.zeros([np.shape(pic)[0], np.shape(pic)[1]])
         picture2sums = np.zeros([np.shape(pic)[0],np.shape(pic)[1]])
         a = np.shape(sinog)[0]
@@ -284,9 +283,8 @@ class Window(Frame):
                 self.setPicture2Output(picture2)
         self.setPicture2Output(picture2)
         #print(self.blad(obraz.wejsciowy, picture2))
-        blad = StringVar()
-        Label(self, textvariable=blad, fg="red",font=("Helvetica", 16)).grid(row=7)
-        blad.set("Błąd: " + str(round(self.blad(obraz.wejsciowy, picture2),2)))
+
+        self.error.set("Błąd: " + str(round(self.blad(obraz.wejsciowy, picture2),2)))
         return picture2
 
     #OBECNIE denoise oraz average NIEUŻYWANE
@@ -307,24 +305,25 @@ class Window(Frame):
                     sum += picture[x + i][y + j]*kernel[i+2][j+2]
         return int(sum / denominator)
 
+    def create_filter_kernel(self):
+        self.kernel = np.zeros(40)
+        for i in range(0, 40):
+            index = abs(i - 20)
+            if index % 2 == 0:
+                self.kernel[i] = 0
+            if index % 2 == 1:
+                self.kernel[i] = (-4.0 / (pi ** 2)) / (index ** 2)
+            if index == 0:
+                self.kernel[i] = 1
+
     def filter(self,view):
-        kernel=np.zeros(40)
-        for i in range(0,40):
-            index=abs(i-20)
-            if index%2==0:
-                kernel[i]=0
-            if index%2==1:
-                kernel[i]=(-4.0/(pi**2))/(index**2)
-            if index==0:
-                kernel[i]=1
         newView = np.zeros(len(view))
         for i in range(0,len(view)):
-            for j in range(0,len(kernel)):
-                center = int(len(kernel)/2)
+            for j in range(0,len(self.kernel)):
+                center = int(len(self.kernel)/2)
                 k=j-center
                 if i+k>0 and i+k<len(view):
-                    newView[i]+=view[i+k]*kernel[j]
-            #newView[i]=max(0,newView[i])
+                    newView[i]+=view[i+k]*self.kernel[j]
         return newView
     def blad(self, pic1, pic2):
         suma = 0
