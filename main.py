@@ -66,8 +66,10 @@ class Window(Frame):
         self.coneWidthEntry.grid(row=5,column=0,sticky='e',padx=xpadding)
 
         self.filterVar = IntVar(value=1)
-        filterCheckbutton = Checkbutton(self,text="Użyj filtrowania",variable=self.filterVar)
-        filterCheckbutton.grid(row=6,column=0,sticky='w',padx=xpadding)
+        Checkbutton(self,text="Użyj filtrowania",variable=self.filterVar).grid(row=6,column=0,sticky='w',padx=xpadding)
+
+        self.gaussVar = IntVar(value=0)
+        Checkbutton(self,text="Użyj rozmycia Gaussa",variable=self.gaussVar).grid(row=7,column=0,sticky='w',padx=xpadding)
 
         self.stepsVar = IntVar(value=1)
         stepsCheckbutton = Checkbutton(self,text="Pokazuj kroki pośrednie",variable=self.stepsVar,command=self.set_speed_visibility)
@@ -80,10 +82,10 @@ class Window(Frame):
         self.speedSlider.grid(row=4,column=1,columnspan=2,rowspan=2)
 
         self.startButton = Button(self,text="Start",command=self.makeSinogram1, width=8)
-        self.startButton.grid(row=7,column=2,sticky='e',padx=20,pady=10)
+        self.startButton.grid(row=8,column=2,sticky='e',padx=20,pady=10)
 
         self.error = StringVar()
-        Label(self, textvariable=self.error, fg="red", font=("Helvetica", 16)).grid(row=7)
+        Label(self, textvariable=self.error, fg="red", font=("Helvetica", 16)).grid(row=8)
 
         self.set_default_values()
         self.master.update()
@@ -281,6 +283,8 @@ class Window(Frame):
             time.sleep((100-self.speedSlider.get())/1000)
             if self.stepsVar.get()==1:
                 self.setPicture2Output(picture2)
+        if self.gaussVar.get()==1:
+            picture2=self.denoise(picture2)
         self.setPicture2Output(picture2)
         #print(self.blad(obraz.wejsciowy, picture2))
 
@@ -334,7 +338,7 @@ class Window(Frame):
         return sqrt(suma / (len(pic1)*len(pic1[0])))
 
 root = Tk()
-root.geometry("620x430")
+root.geometry("620x460")
 
 app=Window(root)
 
