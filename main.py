@@ -283,7 +283,10 @@ class Window(Frame):
             if self.stepsVar.get()==1:
                 self.setPicture2Output(picture2)
         self.setPicture2Output(picture2)
-        print(self.blad(obraz.wejsciowy, picture2))
+        #print(self.blad(obraz.wejsciowy, picture2))
+        blad = StringVar()
+        Label(self, textvariable=blad, fg="red",font=("Helvetica", 16)).grid(row=7)
+        blad.set("Błąd: " + str(round(self.blad(obraz.wejsciowy, picture2),2)))
         return picture2
 
     #OBECNIE denoise oraz average NIEUŻYWANE
